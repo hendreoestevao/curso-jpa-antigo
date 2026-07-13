@@ -12,6 +12,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 public class ConsultasComJPQL {
@@ -29,9 +30,29 @@ public class ConsultasComJPQL {
         // fazendoJoins(entityManager);
         // fazendoLeftJoin(entityManager);
         // carregamentoComJoinFetch(entityManager);
-        filtrandoRegistros(entityManager);
+        //filtrandoRegistros(entityManager);
+        //utilizandoOperadoresLogicos(entityManager);
+       // ultilizandoOperadorIn(entityManager);
         entityManager.close();
         entityManagerFactory.close();
+    }
+
+    private static void ultilizandoOperadorIn(EntityManager entityManager) {
+        String jpql = "select u from Usuario u where u.id in (:ids)";
+        TypedQuery<Usuario> query = entityManager.createQuery(jpql, Usuario.class);
+        query.setParameter("ids", Arrays.asList(1, 2));
+        List<Usuario> usuarios = query.getResultList();
+        usuarios.forEach(u -> System.out.println(u.getId() + " " + u.getNome()));
+    }
+
+    private static void utilizandoOperadoresLogicos(EntityManager entityManager) {
+        String jpql = "select u from Usuario u where u.ultimoAcesso > :ontem and u.ultimoAcesso < :hoje" +
+                " or u.ultimoAcesso is null";
+        TypedQuery<Usuario> query = entityManager.createQuery(jpql, Usuario.class);
+        query.setParameter("ontem", LocalDateTime.now().minusDays(1));
+        query.setParameter("hoje", LocalDateTime.now());
+        List<Usuario> usuarios = query.getResultList();
+        usuarios.forEach(u -> System.out.println(u.getId() + " " + u.getNome()));
     }
 
     private static void filtrandoRegistros(EntityManager entityManager) {
