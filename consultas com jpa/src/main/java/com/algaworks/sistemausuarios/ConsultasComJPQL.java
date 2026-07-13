@@ -10,7 +10,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -24,17 +23,35 @@ public class ConsultasComJPQL {
 
         // primeiraConsulta(entityManager);
         // escolhendoORetorno(entityManager);
-        //fazendoProjecoes(entityManager);
-        //passandoParametros(entityManager);
-        //fazendoJoins(entityManager);
+        // fazendoProjecoes(entityManager);
+        // passandoParametros(entityManager);
+        // fazendoJoins(entityManager);
         // fazendoJoins(entityManager);
         // fazendoLeftJoin(entityManager);
         // carregamentoComJoinFetch(entityManager);
-        //filtrandoRegistros(entityManager);
-        //utilizandoOperadoresLogicos(entityManager);
-       // ultilizandoOperadorIn(entityManager);
+        // filtrandoRegistros(entityManager);
+        // utilizandoOperadoresLogicos(entityManager);
+        // ultilizandoOperadorIn(entityManager);
+        //ordenandoResultados(entityManager);
+        paginandoResultados(entityManager);
+
         entityManager.close();
         entityManagerFactory.close();
+    }
+
+    private static void paginandoResultados(EntityManager entityManager) {
+        String jpql = "select u from Usuario u";
+        TypedQuery<Usuario> query = entityManager.createQuery(jpql, Usuario.class);
+        query.setFirstResult(0).setMaxResults(2);
+        List<Usuario> usuarios = query.getResultList();
+        usuarios.forEach(u -> System.out.println(u.getId() + " " + u.getNome()));
+    }
+
+    private static void ordenandoResultados(EntityManager entityManager) {
+        String jpql = "select u from Usuario u order by u.nome";
+        TypedQuery<Usuario> query = entityManager.createQuery(jpql, Usuario.class);
+        List<Usuario> usuarios = query.getResultList();
+        usuarios.forEach(u -> System.out.println(u.getId() + " " + u.getNome()));
     }
 
     private static void ultilizandoOperadorIn(EntityManager entityManager) {
