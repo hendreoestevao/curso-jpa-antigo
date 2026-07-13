@@ -1,6 +1,7 @@
 package com.algaworks.sistemausuarios;
 
 import com.algaworks.sistemausuarios.dto.UsuarioDTO;
+import com.algaworks.sistemausuarios.model.Configuracao;
 import com.algaworks.sistemausuarios.model.Dominio;
 import com.algaworks.sistemausuarios.model.Usuario;
 
@@ -9,6 +10,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class ConsultasComJPQL {
@@ -21,10 +24,65 @@ public class ConsultasComJPQL {
         // primeiraConsulta(entityManager);
         // escolhendoORetorno(entityManager);
         //fazendoProjecoes(entityManager);
-        passandoParametros(entityManager);
-
+        //passandoParametros(entityManager);
+        //fazendoJoins(entityManager);
+        // fazendoJoins(entityManager);
+        // fazendoLeftJoin(entityManager);
+        // carregamentoComJoinFetch(entityManager);
+        filtrandoRegistros(entityManager);
         entityManager.close();
         entityManagerFactory.close();
+    }
+
+    private static void filtrandoRegistros(EntityManager entityManager) {
+        // LIKE, IS NULL, IS EMPTY, BETWEEN, >, <, >=, <=, =, <>
+        // LIKE select u from Usuario u where u.nome like :nome
+        // IS NULL = select u from Usuario u where u.senha is null
+        // IS EMPTY = select d from Dominio d where d.usuarios is empty
+        // BETWEEN
+
+        String jpql = "select u from Usuario u where u.ultimoAcesso between :ontem and :hoje";
+        // OU POSSO FAZER ASSIM E NAO PRECISA PASSAR O '%' NO PARAMETER
+        // String jpql = "select u from Usuario u where u.nome like concat (:nome, '%')";
+
+        TypedQuery<Usuario> query = entityManager.createQuery(jpql, Usuario.class);
+
+      //  query.setParameter("nome", "Cal%");
+        query.setParameter("ontem", LocalDateTime.now().minusDays(1));
+        query.setParameter("hoje", LocalDateTime.now());
+
+        List<Usuario> usuarios = query.getResultList();
+        usuarios.forEach(u -> System.out.println(u.getId() + " " + u.getNome()));
+    }
+
+    private static void carregamentoComJoinFetch(EntityManager entityManager) {
+        String jpql = "select u from Usuario u join fetch u.configuracao join fetch u.dominio d";
+        TypedQuery<Usuario> query = entityManager.createQuery(jpql, Usuario.class);
+        List<Usuario> usuarios = query.getResultList();
+        usuarios.forEach(u -> System.out.println(u.getId() + " " + u.getNome()));
+    }
+
+    public static void fazendoLeftJoin(EntityManager entityManager) {
+        String jpql = "select u, c from Usuario u left join u.configuracao c";
+        TypedQuery<Object[]> query = entityManager.createQuery(jpql, Object[].class);
+        List<Object[]> resultList = query.getResultList();
+        resultList.forEach(obj -> {
+            String out = ((Usuario) obj[0]).getNome();
+            if (obj[1] == null) {
+                out += ", Null";
+            } else {
+                out += ", " + ((Configuracao) obj[1]).getId();
+            }
+
+            System.out.println(out);
+        });
+    }
+
+    public static void fazendoJoins(EntityManager entityManager) {
+        String jpql = "select u from Usuario u join u.dominio d where d.id = 1";
+        TypedQuery<Usuario> query = entityManager.createQuery(jpql, Usuario.class);
+        List<Usuario> usuarios = query.getResultList();
+        usuarios.forEach(u -> System.out.println(u.getId() + " " + u.getNome()));
     }
 
     private static void passandoParametros(EntityManager entityManager) {
