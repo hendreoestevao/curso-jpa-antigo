@@ -33,19 +33,32 @@ public class ConsultaComCriteria {
         // filtrandoRegistros(entityManager);
         // utilizandoOperadoresLogicos(entityManager);
         // ultilizandoOperadorIn(entityManager);
-            ordenandoResultados(entityManager);
-          //  paginandoResultados(entityManager);
+            //ordenandoResultados(entityManager);
+           paginandoResultados(entityManager);
 
         entityManager.close();
         entityManagerFactory.close();
     }
 
     private static void paginandoResultados(EntityManager entityManager) {
-        String jpql = "select u from Usuario u";
-        TypedQuery<Usuario> query = entityManager.createQuery(jpql, Usuario.class);
-        query.setFirstResult(0).setMaxResults(2);
-        List<Usuario> usuarios = query.getResultList();
-        usuarios.forEach(u -> System.out.println(u.getId() + " " + u.getNome()));
+
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+        CriteriaQuery<Usuario> criteriaQuery = criteriaBuilder.createQuery(Usuario.class);
+        Root<Usuario> root = criteriaQuery.from(Usuario.class);
+
+        criteriaQuery.select(root);
+
+        TypedQuery<Usuario> typedQuery = entityManager.createQuery(criteriaQuery);
+        typedQuery.setFirstResult(2).setMaxResults(2);
+        List<Usuario> usuarios = typedQuery.getResultList();
+        usuarios.forEach(u -> System.out.println(u.getId() + " , " + u.getNome()));
+
+//        String jpql = "select u from Usuario u";
+//        TypedQuery<Usuario> query = entityManager.createQuery(jpql, Usuario.class);
+//        query.setFirstResult(0).setMaxResults(2);
+//        List<Usuario> usuarios = query.getResultList();
+//        usuarios.forEach(u -> System.out.println(u.getId() + " " + u.getNome()));
     }
 
     private static void ordenandoResultados(EntityManager entityManager) {
